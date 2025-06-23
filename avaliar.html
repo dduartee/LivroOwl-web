@@ -3,18 +3,35 @@
 
 <head>
     <meta charset="utf-8">
-    <!-- Font Awesome Icon Library -->
+    <title>Avaliação</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
-        #avaliacao {
-            width: 50%;
+        /* Centralização com Flexbox */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #eaeaea;
+            font-family: Arial, sans-serif;
         }
-        input[type=text],
-        select {
+
+        #avaliacao {
             width: 100%;
-            padding: 12px 20px;
+            max-width: 500px;
+            background-color: #f2f2f2;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type=text],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
             margin: 8px 0;
-            display: inline-block;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
@@ -24,39 +41,41 @@
             width: 100%;
             background-color: #4CAF50;
             color: white;
-            padding: 14px 20px;
-            margin: 8px 0;
+            padding: 14px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-        }
-
-        input[type=button] {
-            background-color: #4CAF50;
-            color: white;
-            padding: 14px 20px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            margin-top: 10px;
         }
 
         input[type=submit]:hover {
             background-color: #45a049;
         }
-
-        div {
-            border-radius: 5px;
-            background-color: #f2f2f2;
-            padding: 20px;
+        .containerEstrelas {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .interacaoSliderEstrelas {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-self: "center";
+            width: 250px;
+        }
+        #estrelas {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+            gap: 5px;
+            margin: 10px 0;
+            font-size: 24px;
         }
 
         .fa-star {
-            font-family: FontAwesome;
-            font-style: normal;
-            font-weight: normal;
             color: lightgray;
-            font-size: 24px;
+            cursor: pointer;
         }
 
         .checked {
@@ -64,57 +83,97 @@
         }
 
         .half-checked {
-            color: rgba(255, 217, 0, 0.363);
+            color: rgba(255, 217, 0, 0.6);
+        }
+
+        #rangeEstrelas {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        #coverLivro {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            min-height: 200px;
+            display: block;
+            margin: 0 auto 15px auto;
+            /* centraliza e dá margem inferior */
+        }
+
+        h3 {
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
 
-
     <div id="avaliacao">
-        <form action="/action_page.php">
-            <h3 id="nomeLivro"></h3>
-            <img src="" id="coverLivro" />
-            <br>
-
-            <div id="estrelas">
-                <span class="star" data-index="1"><i class="fa-regular fa-star"></i></span>
-                <span class="star" data-index="2"><i class="fa-regular fa-star"></i></span>
-                <span class="star" data-index="3"><i class="fa-regular fa-star"></i></span>
-                <span class="star" data-index="4"><i class="fa-regular fa-star"></i></span>
-                <span class="star" data-index="5"><i class="fa-regular fa-star"></i></span>
+        <form method="post">
+            <h3 id="nomeLivro">Carregando...</h3>
+            <input type="hidden" name="idLivro" id="idLivro" value="{{ idLivroDB }}">
+            <img src="" id="coverLivro" alt="Capa do Livro" />
+            <div class="containerEstrelas">
+                <div class="interacaoSliderEstrelas">
+                    <div id="estrelas">
+                        <span class="star" data-index="1"><i class="fa fa-star"></i></span>
+                        <span class="star" data-index="2"><i class="fa fa-star"></i></span>
+                        <span class="star" data-index="3"><i class="fa fa-star"></i></span>
+                        <span class="star" data-index="4"><i class="fa fa-star"></i></span>
+                        <span class="star" data-index="5"><i class="fa fa-star"></i></span>
+                    </div>
+                    <input type="range" min="0" max="5" value="0" step="0.5" name="estrelas" id="rangeEstrelas">
+                </div>
             </div>
-            <input type="range" min="0" max="5" value="0" step="0.5" id="qtdEstrelas">
+
 
             <p><label for="w3review">Comentários sobre o livro</label></p>
-            <textarea id="w3review" name="w3review" rows="4" cols="50"></textarea>
-            <br>
-            <input type="button" value="Gostei" />
+            <textarea id="w3review" name="comentario" rows="4"></textarea>
+
+            <label><input type="checkbox" name="liked" value="Gostei" /> Like</label>
+
             <input type="submit" value="Avaliar">
         </form>
     </div>
+
+    <!-- Interatividade do Slider e Estrelas -->
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const rangeInput = document.getElementById("qtdEstrelas");
-            const estrelas = document.querySelectorAll("#estrelas .fa-star");
+        document.addEventListener('DOMContentLoaded', function () {
+            const rangeInput = document.getElementById('rangeEstrelas');
+            const estrelas = document.querySelectorAll('#estrelas .fa');
 
-            rangeInput.addEventListener("input", function () {
-                const valor = parseFloat(rangeInput.value);
-
+            function atualizarEstrelas(valor) {
                 estrelas.forEach((estrela, index) => {
-                    estrela.classList.remove("checked", "half-checked");
-
+                    estrela.classList.remove('checked', 'half-checked');
                     const pos = index + 1;
-
                     if (valor >= pos) {
-                        estrela.classList.add("checked");
+                        estrela.classList.add('checked');
                     } else if (valor >= pos - 0.5) {
-                        estrela.classList.add("half-checked");
+                        estrela.classList.add('half-checked');
                     }
                 });
+            }
+
+            rangeInput.addEventListener('input', () => {
+                atualizarEstrelas(parseFloat(rangeInput.value));
             });
+
+            // Clique direto nas estrelas
+            estrelas.forEach((estrela, index) => {
+                estrela.addEventListener('click', () => {
+                    const valor = index + 1;
+                    rangeInput.value = valor;
+                    atualizarEstrelas(valor);
+                });
+            });
+
+            atualizarEstrelas(parseFloat(rangeInput.value));
         });
+    </script>
+
+    <!-- OpenLibrary Integration -->
+    <script>
         class OpenLibraryAPI {
             constructor() {
                 this.baseURL = "https://openlibrary.org";
@@ -130,78 +189,49 @@
             }
 
             async getWork(id) {
-                try {
-                    const response = await fetch(this.getWorkURL(id));
-                    if (!response.ok) {
-                        throw new Error("Erro na requisição getWork");
-                    }
-
-                    const data = await response.json();
-                    const title = data.title;
-                    let firstSubject = "nao-definido";
-
-                    if (Array.isArray(data.subjects) && data.subjects.length > 0) {
-                        firstSubject = data.subjects[0];
-                    }
-
-                    return { title, subject: firstSubject };
-                } catch (error) {
-                    throw new Error("Erro ao buscar ou processar getWork: " + error.message);
-                }
+                const response = await fetch(this.getWorkURL(id));
+                const data = await response.json();
+                return {
+                    title: data.title,
+                    subject: (data.subjects && data.subjects[0]) || "nao-definido"
+                };
             }
 
             async getRandomBook() {
                 const url = `${this.baseURL}/people/mekBot/books/want-to-read.json?limit=20`;
+                const response = await fetch(url);
+                const data = await response.json();
+                const entries = data.reading_log_entries;
+
+                if (!entries || entries.length === 0) throw new Error("Nenhuma entrada.");
+
+                if (this.indexQueue.length === 0) {
+                    const indices = Array.from({ length: entries.length }, (_, i) => i);
+                    this.shuffle(indices);
+                    this.indexQueue.push(...indices);
+                }
+
+                const index = this.indexQueue.shift();
+                const work = entries[index].work;
+
+                const livro = {
+                    id: work.key,
+                    capaId: work.cover_id || "",
+                    autor: (work.author_names && work.author_names[0]) || "Autor desconhecido",
+                    dataPub: work.first_publish_year || "indefinido",
+                    coverURL: this.getBookCoverURL(work.cover_id || "")
+                };
 
                 try {
-                    const response = await fetch(url);
-                    if (!response.ok) {
-                        throw new Error("Erro na requisição fetchLivro");
-                    }
-
-                    const data = await response.json();
-                    const entries = data.reading_log_entries;
-
-                    if (!entries || entries.length === 0) {
-                        throw new Error("Nenhuma entrada encontrada.");
-                    }
-
-                    // Embaralha os índices se a fila estiver vazia
-                    if (this.indexQueue.length === 0) {
-                        const indices = Array.from({ length: entries.length }, (_, i) => i);
-                        this.shuffle(indices);
-                        this.indexQueue.push(...indices);
-                    }
-
-                    const index = this.indexQueue.shift();
-                    const work = entries[index].work;
-
-                    const livro = {
-                        id: work.key,
-                        capaId: work.cover_id || "",
-                        autor: (work.author_names && work.author_names[0]) || "Autor desconhecido",
-                        dataPub: work.first_publish_year || "indefinido",
-                        coverURL: ""
-                    };
-
-                    livro.coverURL = this.getBookCoverURL(livro.capaId);
-
-                    // Busca nome e gênero com getWork
-                    try {
-                        const workData = await this.getWork(work.key);
-                        livro.nome = workData.title;
-                        livro.genero = workData.subject;
-                    } catch (error) {
-                        // Continua mesmo com erro
-                        livro.nome = "Título desconhecido";
-                        livro.genero = "Gênero indefinido";
-                    }
-
-                    return livro;
-
-                } catch (error) {
-                    throw new Error("Erro ao buscar livro aleatório: " + error.message);
+                    const workData = await this.getWork(work.key);
+                    livro.nome = workData.title;
+                    livro.genero = workData.subject;
+                } catch {
+                    livro.nome = "Título desconhecido";
+                    livro.genero = "Gênero indefinido";
                 }
+
+                return livro;
             }
 
             shuffle(array) {
@@ -211,16 +241,16 @@
                 }
             }
         }
+
         const api = new OpenLibraryAPI();
 
         api.getRandomBook()
             .then(livro => {
                 document.getElementById("coverLivro").src = livro.coverURL;
                 document.getElementById("nomeLivro").innerText = livro.nome;
-                console.log("Livro aleatório:", livro);
             })
             .catch(error => {
-                console.error("Erro:", error.message);
+                console.error("Erro ao carregar livro:", error.message);
             });
     </script>
 </body>

@@ -1,2 +1,2 @@
 # LivroOwl-html
-repostório para o código html do sistema livroowl
+repostório para o código web do sistema livroowl

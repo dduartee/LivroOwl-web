@@ -96,9 +96,23 @@ public class AvaliarLivroServlet extends HttpServlet {
         html.append("<meta charset=\"utf-8\">");
         html.append("<title>Avaliação</title>");
         html.append("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">");
+
+        // Fonte Overpass Mono
+        html.append("<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">");
+        html.append("<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>");
+        html.append("<link href=\"https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300..700&display=swap\" rel=\"stylesheet\">");
+
         html.append("<style>");
-        html.append("body { display: flex; justify-content: center; height: 100vh; margin: 0; background-color: #eaeaea; font-family: Arial, sans-serif; }");
-        html.append("#avaliacao { width: 100%; max-width: 500px; background-color: #f2f2f2; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }");
+        html.append("body { font-family: 'Overpass Mono', monospace; font-weight: 400; display: flex; flex-direction: column; align-items: center; margin: 0; background-color: #eaeaea; }");
+
+        // Topbar estilo LivroOwl
+        html.append(".topnav { background-color: #333; display: flex; justify-content: space-between; padding: 0 16px; color: white; width: 100%; box-sizing: border-box; }");
+        html.append(".topnav a { color: #f2f2f2; padding: 14px 16px; text-decoration: none; font-size: 17px; }");
+        html.append(".topnav a:hover { background-color: #ddd; color: black; }");
+        html.append(".topnav a.active { background-color: #04aa6d; color: white; }");
+        html.append(".app-name { font-size: 20px; font-weight: bold; }");
+
+        html.append("#avaliacao { width: 100%; max-width: 500px; background-color: #f2f2f2; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin-top: 40px; }");
         html.append("input[type=text], select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }");
         html.append("input[type=submit] { width: 100%; background-color: #4CAF50; color: white; padding: 14px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }");
         html.append("input[type=submit]:hover { background-color: #45a049; }");
@@ -115,6 +129,15 @@ public class AvaliarLivroServlet extends HttpServlet {
         html.append("</head>");
         html.append("<body>");
 
+        // Topbar inserida no body
+        html.append("<div class=\"topnav\">");
+        html.append("<div class=\"app-name\">📚 LivroOwl</div>");
+        html.append("<div class=\"nav-links\">");
+        html.append("<a href=\"listar\">Avaliações</a>");
+        html.append("<a class=\"active\" href=\"\">Avaliar</a>");
+        html.append("</div>");
+        html.append("</div>");
+
         html.append("<div id=\"avaliacao\">");
         html.append("<form method=\"post\">");
         html.append("<h3 id=\"nomeLivro\">" + book.get("nome") + "</h3>");
@@ -128,13 +151,12 @@ public class AvaliarLivroServlet extends HttpServlet {
             html.append("<span class=\"star\" data-index=\"" + i + "\"><i class=\"fa fa-star\"></i></span>");
         }
         html.append("</div>");
-        html.append("<input type=\"range\" min=\"0\" max=\"5\" value=\"0\" step=\"0.5\" name=\"estrelas\" id=\"rangeEstrelas\">");
+        html.append("<input type=\"range\" min=\"0.5\" max=\"5\" value=\"0\" step=\"0.5\" name=\"estrelas\" id=\"rangeEstrelas\">");
         html.append("</div>");
         html.append("</div>");
 
         html.append("<p><label for=\"w3review\">Comentários sobre o livro</label></p>");
         html.append("<textarea id=\"w3review\" name=\"comentario\" rows=\"4\"></textarea>");
-
         html.append("<label><input type=\"checkbox\" name=\"liked\" value=\"Gostei\" /> Like</label>");
         html.append("<input type=\"submit\" value=\"Avaliar\">");
         html.append("</form>");
@@ -188,12 +210,20 @@ public class AvaliarLivroServlet extends HttpServlet {
         // Configura a resposta para a codificação correta
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
-
         // Obtém os dados enviados no formulário
-        String idLivro = request.getParameter("idLivro"); // Aqui, você pode pegar o nome do livro ou outras informações
-        String estrelas = request.getParameter("estrelas"); // Número de estrelas
-        String comentario = request.getParameter("comentario"); // Comentário sobre o livro
-        Boolean liked = request.getParameter("liked") == "Gostei";
+        String idLivro = "";
+        String estrelas = "";
+        String comentario = "";
+        Integer liked = 0;
+        try {
+        	idLivro = request.getParameter("idLivro"); // Aqui, você pode pegar o nome do livro ou outras informações
+            estrelas = request.getParameter("estrelas"); // Número de estrelas
+            comentario = request.getParameter("comentario"); // Comentário sobre o livro
+            liked = request.getParameter("liked").equals("Gostei") ? 1 : 0;
+		} catch (Exception e) {
+		}
+        
+        
      // Obtendo a data e hora atual
         LocalDateTime now = LocalDateTime.now();
 
@@ -208,6 +238,7 @@ public class AvaliarLivroServlet extends HttpServlet {
         System.out.println("timestampAvaliado: " + timestampAvaliado);
         Map<String, String> avaliacaoData = parseAvaliationToBackend(idLivro, estrelas, comentario, liked,
 				timestampAvaliado);
+        System.out.println("avaliacaoData: "+avaliacaoData);
         Map<String, String> resultado = livrosAPI.pushAvaliacao(avaliacaoData); // Envia os dados e obtém a resposta
         System.out.println("resultado: "+resultado); // {success=true, timestamp_avaliado=1750636800, id=2, message=Avaliação cadastrada com sucesso!}
         Boolean success = Boolean.valueOf(resultado.get("success"));
@@ -215,7 +246,7 @@ public class AvaliarLivroServlet extends HttpServlet {
             // Se a avaliação foi cadastrada com sucesso, redireciona o usuário para a página de avaliação
             System.out.println("Avaliação cadastrada com sucesso!");
             // Redireciona o usuário para a página de avaliação, ou página principal, ou qualquer outra página relevante
-            response.sendRedirect("avaliar"); // URL de destino para a avaliação de sucesso
+            response.sendRedirect("listar"); // URL de destino para a avaliação de sucesso
         } else {
         	String errorMessage = resultado.get("message");
             // Se houve algum erro, exibe a mensagem de erro
@@ -224,13 +255,13 @@ public class AvaliarLivroServlet extends HttpServlet {
             response.getWriter().write("<p><strong>Mensagem de erro:</strong> " + errorMessage + "</p>");
         }
     }
-	private Map<String, String> parseAvaliationToBackend(String idLivro, String estrelas, String comentario, Boolean liked,
+	private Map<String, String> parseAvaliationToBackend(String idLivro, String estrelas, String comentario, Integer liked,
 			String timestampAvaliado) {
 		Map<String, String> avaliacaoData = new HashMap<>();
         avaliacaoData.put("idLivro", idLivro); // ID do livro
         avaliacaoData.put("estrelas", estrelas); // Número de estrelas
         avaliacaoData.put("comentario", comentario); // Comentário
-        avaliacaoData.put("liked", String.valueOf(liked)); // Gostei (booleano convertido para String)
+        avaliacaoData.put("liked", liked.toString()); // Gostei (booleano convertido para String)
         avaliacaoData.put("timestamp_avaliado", timestampAvaliado); // Timestamp da avaliação
 		return avaliacaoData;
 	}

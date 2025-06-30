@@ -54,7 +54,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
         // CSS
         pwHTML.println("  <style>");
         pwHTML.println("    body { font-family: 'Overpass Mono', monospace; font-weight: 400; background-color: #eaeaea;}");
-        pwHTML.println("    #avaliacoes { display: flex; flex-wrap: wrap; gap: 3rem; }");
+        pwHTML.println("    #avaliacoes { display: flex; flex-wrap: wrap; gap: 3rem; justify-content: center; }");
         pwHTML.println("    .avaliacaoItem { display: flex; flex-direction: column; align-items: center; position: relative; width: 300px; background: #f2f2f2; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }");
         pwHTML.println("    .avaliacaoItem img { object-fit: cover; height: 200px; display: block; margin: 0 auto 15px; }");
         pwHTML.println("    .avaliacaoItem h3 { text-align: center; }");
